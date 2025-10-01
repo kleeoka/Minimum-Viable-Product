@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Resume Tailor (MVP)</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <h1>Resume Tailor (MVP)</h1>
+
+    <section class="card">
+      <h2>1) Your resume (paste or upload .txt)</h2>
+      <input id="resumeFile" type="file" accept=".txt" />
+      <textarea id="resumeText" placeholder="Paste your resume text here (or upload a .txt)"></textarea>
+    </section>
+
+    <section class="card">
+      <h2>2) Job description</h2>
+      <textarea id="jobText" placeholder="Paste the job posting or job requirements here"></textarea>
+    </section>
+
+    <div class="controls">
+      <label>
+        <input id="includeBullets" type="checkbox" checked />
+        Keep bullet-style resume layout
+      </label>
+      <button id="generateBtn" class="btn">Generate tailored resume + cover letter</button>
+    </div>
+
+    <section id="status" class="card small hidden">Waiting...</section>
+
+    <section class="card">
+      <h2>Results</h2>
+      <div id="results">
+        <h3>Tailored Resume</h3>
+        <pre id="tailoredResume" class="output"></pre>
+
+        <h3>Cover Letter</h3>
+        <pre id="coverLetter" class="output"></pre>
+
+        <h3>Change Notes (what the AI changed)</h3>
+        <pre id="changeNotes" class="output"></pre>
+      </div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

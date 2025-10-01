@@ -1,0 +1,13 @@
+body { font-family: Arial, Helvetica, sans-serif; background:#f2f6fb; margin:0; padding:20px; color:#111;}
+.wrap { max-width:900px; margin:0 auto; }
+h1 { text-align:center; }
+.card { background:white; padding:14px; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.06); margin-bottom:12px;}
+textarea { width:100%; min-height:140px; padding:10px; border-radius:6px; border:1px solid #ddd; resize:vertical; }
+.controls { display:flex; gap:12px; align-items:center; margin-bottom:12px; }
+.btn { background:#2563eb; color:white; padding:10px 14px; border-radius:6px; border:none; cursor:pointer; }
+.btn:disabled { opacity:0.6; cursor:not-allowed; }
+.small { padding:8px; font-size:0.95rem; }
+.hidden { display:none; }
+.output { white-space:pre-wrap; background:#fafafa; padding:10px; border-radius:6px; border:1px solid #eee; }
+input[type=file] { margin-bottom:8px; }
+label { font-size:0.95rem; }
