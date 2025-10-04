@@ -38,7 +38,7 @@ Return JSON: {tailoredResume:"", coverLetter:"", changeNotes:""}
         { role: "user", content: userPrompt }
       ],
       temperature: 0.2,
-      max_tokens: 1200
+      max_tokens: 500
     });
 
     let parsed = {};
@@ -58,3 +58,4 @@ Return JSON: {tailoredResume:"", coverLetter:"", changeNotes:""}
     res.status(500).json({ error: err.message });
   }
 }
+
