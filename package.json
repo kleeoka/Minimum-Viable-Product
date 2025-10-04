@@ -1,0 +1,12 @@
+{
+  "name": "resume-tool",
+  "version": "1.0.0",
+  "description": "Resume tailoring MVP with OpenAI",
+  "main": "index.js",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "openai": "^4.10.0"
+  }
+}
