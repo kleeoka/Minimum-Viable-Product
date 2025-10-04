@@ -4,59 +4,45 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-// Retry helper
-async function callOpenAIWithRetry(params, retries = 3, delayMs = 1500) {
-  for (let i = 0; i < retries; i++) {
-    try {
-      return await openai.chat.completions.create(params);
-    } catch (err) {
-      if (err.status === 429 && i < retries - 1) {
-        console.warn(`429 received, retrying in ${delayMs}ms...`);
-        await new Promise(res => setTimeout(res, delayMs));
-      } else {
-        throw err;
-      }
-    }
-  }
+// Simple helper to estimate token count (rough)
+function estimateTokens(str) {
+  return Math.ceil(str.split(/\s+/).length * 1.33); // ~1.33 tokens per word
 }
 
-// Serverless handler
 module.exports = async function handler(req, res) {
+  console.log("=== API Request received ===");
+  console.log("Method:", req.method);
+  const startTime = Date.now();
+
   if (req.method !== "POST") {
+    console.log("Invalid method, returning 405");
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { resumeText, jobText, keepBullets } = req.body || {};
+  const { resumeText, jobText } = req.body || {};
+  console.log("Resume length:", resumeText ? resumeText.length : 0);
+  console.log("Job description length:", jobText ? jobText.length : 0);
+  console.log("Estimated tokens:", estimateTokens(resumeText || "") + estimateTokens(jobText || ""));
 
   if (!resumeText || !jobText) {
+    console.log("Missing resume or job text, returning 400");
     return res.status(400).json({ error: "resumeText and jobText are required" });
   }
 
   try {
-    const systemPrompt = "You are a helpful assistant that edits resumes and writes concise cover letters. Output only valid JSON.";
-    const userPrompt = `
-Resume text:
-${resumeText}
-
-Job description:
-${jobText}
-
-TASK:
-1) Create a tailored resume
-2) Create a 3-paragraph cover letter
-3) Include change notes
-Return JSON: {tailoredResume:"", coverLetter:"", changeNotes:""}
-`;
-
-    const response = await callOpenAIWithRetry({
+    console.log("Calling OpenAI API...");
+    const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
+        { role: "system", content: "You are a helpful assistant that edits resumes and writes concise cover letters. Output only valid JSON." },
+        { role: "user", content: `Resume:\n${resumeText}\n\nJob:\n${jobText}\n\nReturn JSON: {tailoredResume:"", coverLetter:"", changeNotes:""}` }
       ],
       temperature: 0.2,
       max_tokens: 500
     });
+
+    const duration = Date.now() - startTime;
+    console.log("OpenAI response received in", duration, "ms");
 
     let parsed = {};
     try {
@@ -73,6 +59,8 @@ Return JSON: {tailoredResume:"", coverLetter:"", changeNotes:""}
 
   } catch (err) {
     console.error("OpenAI API error:", err);
+    const duration = Date.now() - startTime;
+    console.log("Request failed after", duration, "ms");
     res.status(500).json({ error: err.message });
   }
 };
