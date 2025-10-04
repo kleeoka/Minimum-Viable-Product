@@ -4,6 +4,23 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
+// Helper function to retry on 429 (Too Many Requests)
+async function callOpenAIWithRetry(params, retries = 3, delayMs = 1500) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await openai.chat.completions.create(params);
+    } catch (err) {
+      if (err.status === 429 && i < retries - 1) {
+        // Wait before retrying
+        console.warn(`429 received, retrying in ${delayMs}ms...`);
+        await new Promise(res => setTimeout(res, delayMs));
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -31,31 +48,8 @@ TASK:
 Return JSON: {tailoredResume:"", coverLetter:"", changeNotes:""}
 `;
 
-    const response = await openai.chat.completions.create({
+    const response = await callOpenAIWithRetry({
       model: "gpt-3.5-turbo",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-      ],
-      temperature: 0.2,
-      max_tokens: 500
-    });
-
-    let parsed = {};
-    try {
-      parsed = JSON.parse(response.choices[0].message.content);
-    } catch {
-      parsed = {
-        tailoredResume: "",
-        coverLetter: "",
-        changeNotes: response.choices[0].message.content
-      };
-    }
-
-    res.status(200).json(parsed);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
-}
-
+        { role: "user", conte
